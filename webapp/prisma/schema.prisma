@@ -2,6 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Local dev: keep provider = "sqlite", DATABASE_URL="file:./dev.db"
+// Production (Vercel): change provider to "postgresql", set DATABASE_URL to your Postgres URL
+// Run: node scripts/use-postgres.js to swap for production builds
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -68,15 +71,15 @@ model TokenBalance {
 }
 
 model Subscription {
-  id        String             @id @default(cuid())
-  userId    String             @unique
-  plan      String
-  status    String             @default("active")
-  tokensPerMonth Int
-  startDate DateTime           @default(now())
-  endDate   DateTime?
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  plan                 String
+  status               String    @default("active")
+  tokensPerMonth       Int
+  startDate            DateTime  @default(now())
+  endDate              DateTime?
   stripeSubscriptionId String?
-  updatedAt DateTime           @updatedAt
+  updatedAt            DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -93,16 +96,16 @@ model UsageLog {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
-  userId    String
-  amount    Float
-  currency  String
-  method    String
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  currency    String
+  method      String
   tokensAdded Int
-  status    String   @default("pending")
-  externalId String?
-  txHash    String?
-  createdAt DateTime @default(now())
+  status      String   @default("pending")
+  externalId  String?
+  txHash      String?
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

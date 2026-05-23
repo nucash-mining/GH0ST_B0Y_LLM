@@ -32,6 +32,8 @@ export interface PricingPlan {
   price: number;
   description: string;
   subscription?: boolean;
+  nodeProgram?: boolean;
+  highlight?: boolean;
   features: string[];
 }
 
@@ -51,6 +53,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 15,
     description: 'Monthly subscription',
     subscription: true,
+    highlight: true,
     features: ['2M tokens / month', 'All models', 'Priority queue', 'Usage analytics'],
   },
   {
@@ -61,5 +64,23 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'Monthly subscription',
     subscription: true,
     features: ['10M tokens / month', 'All models', 'Dedicated node', 'API access', 'Chain dashboard'],
+  },
+  {
+    key: 'node',
+    name: 'Node Operator',
+    tokens: -1,
+    price: 200,
+    description: 'Annual — own instance',
+    subscription: true,
+    nodeProgram: true,
+    features: [
+      'Your own GH0ST_B0Y instance',
+      'NVIDIA DGX Air · 96GB VRAM',
+      'Up to 500GB storage',
+      'Unlimited personal AI use',
+      'Earn by sharing compute',
+      'GPU · RAM · Storage · Relay',
+      'Requires @wattxchain.org email',
+    ],
   },
 ];

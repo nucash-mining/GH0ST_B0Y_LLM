@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Type-check & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webapp
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: file:./ci.db
+          NEXTAUTH_SECRET: ci-secret-not-real
+          NEXTAUTH_URL: http://localhost:3000
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+          NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ci-placeholder
+          NEXT_PUBLIC_CHAIN_ID: "11155111"
+          NEXT_PUBLIC_UNITY_TRUST_ADDRESS: "0x0000000000000000000000000000000000000000"
+          PAYMENT_RECEIVER_ADDRESS: "0x0000000000000000000000000000000000000000"
+          OLLAMA_URL: http://localhost:11434

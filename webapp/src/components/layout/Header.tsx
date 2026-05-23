@@ -29,6 +29,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-mono text-ghost-text">
           <Link href="/chat" className="hover:text-ghost-cyan transition-colors">Chat</Link>
           <Link href="/pricing" className="hover:text-ghost-cyan transition-colors">Pricing</Link>
+          <Link href="/node-program" className="hover:text-ghost-purple transition-colors text-ghost-purple/70">Nodes</Link>
           {session && (
             <Link href="/account" className="hover:text-ghost-cyan transition-colors">Account</Link>
           )}
