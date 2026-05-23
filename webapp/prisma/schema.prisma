@@ -2,11 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Local dev: keep provider = "sqlite", DATABASE_URL="file:./dev.db"
-// Production (Vercel): change provider to "postgresql", set DATABASE_URL to your Postgres URL
-// Run: node scripts/use-postgres.js to swap for production builds
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
