@@ -1,0 +1,147 @@
+{
+  "name": "ghost-boy-oracle",
+  "displayName": "𝔾ℍ𝟘𝕊𝕋_𝔹𝟘𝕐-v_X ᴇᴠ-ʟʟᴍ 𝒪𝓇𝒶𝒸𝓁𝑒",
+  "description": "EV-LLM Oracle coordinating 7 blockchains from genesis hash 0. In memory of GHOST - April 7, 2025",
+  "version": "0.1.0",
+  "publisher": "ghost-boy-memorial",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Data Science"
+  ],
+  "keywords": [
+    "ghost",
+    "oracle",
+    "llm",
+    "blockchain",
+    "ev-llm",
+    "genesis"
+  ],
+  "icon": "media/ghost-icon.png",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "keybindings": [
+      {
+        "command": "ghostBoyOracle.openVirtualBoy",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ghostBoyOracle.start",
+        "title": "GH0ST_B0Y: Start Oracle VM",
+        "icon": "$(ghost)"
+      },
+      {
+        "command": "ghostBoyOracle.stop",
+        "title": "GH0ST_B0Y: Stop Oracle VM"
+      },
+      {
+        "command": "ghostBoyOracle.status",
+        "title": "GH0ST_B0Y: Check Chain Status"
+      },
+      {
+        "command": "ghostBoyOracle.showPanel",
+        "title": "GH0ST_B0Y: Open Oracle Dashboard"
+      },
+      {
+        "command": "ghostBoyOracle.openChat",
+        "title": "GH0ST_B0Y: Open Agent Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "ghostBoyOracle.openVirtualBoy",
+        "title": "GH0ST_B0Y: Launch ViRtUaL_B0Y",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "ghostBoyOracle.checkOllama",
+        "title": "GH0ST_B0Y: Check Ollama Status"
+      },
+      {
+        "command": "ghostBoyOracle.devActivate",
+        "title": "GH0ST_B0Y: Dev Mode (Skip Payment)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ghost-boy-oracle",
+          "title": "𝔾ℍ𝟘𝕊𝕋_𝔹𝟘𝕐 Oracle",
+          "icon": "media/ghost-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ghost-boy-oracle": [
+        {
+          "id": "ghostBoyOracle.chains",
+          "name": "7 Genesis Chains"
+        },
+        {
+          "id": "ghostBoyOracle.status",
+          "name": "Oracle Status"
+        },
+        {
+          "id": "ghostBoyOracle.memory",
+          "name": "Memory Monitor"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "ghostBoyOracle.openVirtualBoy",
+          "when": "view == ghostBoyOracle.chains",
+          "group": "navigation"
+        },
+        {
+          "command": "ghostBoyOracle.checkOllama",
+          "when": "view == ghostBoyOracle.chains"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "𝔾ℍ𝟘𝕊𝕋_𝔹𝟘𝕐 Oracle",
+      "properties": {
+        "ghostBoyOracle.oracleVmPath": {
+          "type": "string",
+          "default": "/home/nuts/.genesis/scripts/oracle_vm.py",
+          "description": "Path to Oracle VM script"
+        },
+        "ghostBoyOracle.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto-start Oracle VM when VS Codium opens"
+        },
+        "ghostBoyOracle.ollamaUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Ollama server URL for local LLM inference"
+        },
+        "ghostBoyOracle.ollamaModel": {
+          "type": "string",
+          "default": "llama3.2",
+          "description": "Default Ollama model to use for chat"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^5.0.0"
+  }
+}

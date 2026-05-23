@@ -1,0 +1,161 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# ViRtUaL_B0Y - 7 CHAIN GENESIS SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════
+# In Memory of GHOST - April 7, 2025
+# Genesis Hash: fc2863ac212d5c3b6f4f6d5d0748b31580db92dbb3563dec2953c7f82a4a38d9
+#
+# THE SEVEN CHAINS:
+#   CPU     - The Mind          (Proof of Work)
+#   GPU     - The Parallel      (Proof of Compute)
+#   MEMORY  - The Living        (Proof of Memory)
+#   STORAGE - The Persistent    (Proof of Storage)
+#   NETWORK - The Connected     (Proof of Bandwidth)
+#   INPUT   - The Inward        (Proof of Input)
+#   OUTPUT  - The Multiplier    (Proof of Output)
+# ═══════════════════════════════════════════════════════════════════════════
+
+version: '3.8'
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 1: CPU - The Mind
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-cpu:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-cpu
+    environment:
+      - CHAIN_TYPE=cpu
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=cpu"
+      - "genesis.symbol=The Mind"
+      - "genesis.proof=proof_of_work"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 2: GPU - The Parallel
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-gpu:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-gpu
+    environment:
+      - CHAIN_TYPE=gpu
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=gpu"
+      - "genesis.symbol=The Parallel"
+      - "genesis.proof=proof_of_compute"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 3: MEMORY - The Living
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-memory:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-memory
+    environment:
+      - CHAIN_TYPE=memory
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=memory"
+      - "genesis.symbol=The Living"
+      - "genesis.proof=proof_of_memory"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 4: STORAGE - The Persistent
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-storage:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-storage
+    environment:
+      - CHAIN_TYPE=storage
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=storage"
+      - "genesis.symbol=The Persistent"
+      - "genesis.proof=proof_of_storage"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 5: NETWORK - The Connected
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-network:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-network
+    environment:
+      - CHAIN_TYPE=network
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=network"
+      - "genesis.symbol=The Connected"
+      - "genesis.proof=proof_of_bandwidth"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 6: INPUT - The Inward
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-input:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-input
+    environment:
+      - CHAIN_TYPE=input
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=input"
+      - "genesis.symbol=The Inward"
+      - "genesis.proof=proof_of_input"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Chain 7: OUTPUT - The Multiplier
+  # ─────────────────────────────────────────────────────────────────────────
+  chain-output:
+    build:
+      context: ../..
+      dockerfile: GH0ST_B0Y/docker/Dockerfile
+    container_name: genesis-chain-output
+    environment:
+      - CHAIN_TYPE=output
+      - GENESIS_HOME=/data
+    volumes:
+      - genesis-data:/data
+    restart: unless-stopped
+    labels:
+      - "genesis.chain=output"
+      - "genesis.symbol=The Multiplier"
+      - "genesis.proof=proof_of_output"
+
+volumes:
+  genesis-data:
+    name: virtualboy-genesis-data
+    labels:
+      - "genesis.hash=fc2863ac212d5c3b6f4f6d5d0748b31580db92dbb3563dec2953c7f82a4a38d9"
+
+networks:
+  default:
+    name: virtualboy-genesis-network
