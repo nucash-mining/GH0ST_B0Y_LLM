@@ -113,13 +113,18 @@ model Node {
   walletAddress String?
   ollamaUrl     String
   name          String
+  nodeType      String    @default("pc")       // pc | dgx_air
   status        String    @default("pending")  // pending | active | suspended
   approved      Boolean   @default(false)
   gpuModel      String?
+  cpuModel      String?
   vramGb        Int?
+  ramGb         Int?
   storageGb     Int?
+  resources     String[]  // gpu | cpu | ram | storage | bandwidth | relay
   modelsLoaded  String[]
   tokensServed  Int       @default(0)
+  agentToken    String?   @unique
   lastHeartbeat DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
