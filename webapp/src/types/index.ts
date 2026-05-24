@@ -3,6 +3,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   tokensUsed?: number;
+  queued?: boolean;
   timestamp: Date;
 }
 
