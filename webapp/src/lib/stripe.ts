@@ -11,6 +11,7 @@ export const PLANS = {
     price: 5,
     priceId: null as string | null,
     description: '500K tokens',
+    subscription: false,
   },
   pro: {
     name: 'Pro',
