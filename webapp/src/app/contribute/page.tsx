@@ -116,31 +116,22 @@ export default function ContributePage() {
 
             <div className="space-y-3">
               <div>
-                <div className="text-ghost-muted font-mono text-xs mb-1">Step 1 — Download the agent</div>
-                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto">
-{`curl -O https://ghost-boy-llm.vercel.app/ghostboy-agent.py`}
+                <div className="text-ghost-muted font-mono text-xs mb-2 uppercase tracking-widest">Linux / macOS — one-line install</div>
+                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto whitespace-pre-wrap break-all">
+{`curl -fsSL https://ghost-boy-llm.vercel.app/install.sh | bash -s -- --token ${agentToken}`}
                 </pre>
               </div>
               <div>
-                <div className="text-ghost-muted font-mono text-xs mb-1">Step 2 — Run it (Python 3.8+ required)</div>
-                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto">
-{`python3 ghostboy-agent.py --token ${agentToken}`}
+                <div className="text-ghost-muted font-mono text-xs mb-2 uppercase tracking-widest">Windows — PowerShell one-liner</div>
+                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto whitespace-pre-wrap break-all">
+{`iex (irm https://ghost-boy-llm.vercel.app/install.ps1); & "$env:USERPROFILE\\.ghostboy\\start.bat"`}
                 </pre>
               </div>
               <div>
-                <div className="text-ghost-muted font-mono text-xs mb-1">Step 3 — Keep it running (optional: run as a service)</div>
-                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto">
-{`# Linux systemd — save as /etc/systemd/system/ghostboy.service
-[Unit]
-Description=GH0ST_B0Y Node Agent
-After=network.target
-
-[Service]
-ExecStart=python3 /path/to/ghostboy-agent.py --token ${agentToken}
-Restart=always
-
-[Install]
-WantedBy=multi-user.target`}
+                <div className="text-ghost-muted font-mono text-xs mb-2 uppercase tracking-widest">Manual (Python 3.8+)</div>
+                <pre className="bg-ghost-darker rounded-lg p-3 text-xs font-mono text-ghost-cyan overflow-x-auto whitespace-pre-wrap break-all">
+{`curl -O https://ghost-boy-llm.vercel.app/ghostboy-agent.py
+python3 ghostboy-agent.py --token ${agentToken}`}
                 </pre>
               </div>
             </div>

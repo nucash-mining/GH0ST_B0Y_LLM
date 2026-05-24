@@ -18,13 +18,9 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
   }
 
-  const balance = await prisma.tokenBalance.findUnique({
-    where: { userId: session.user.id },
-  });
-
+  const balance = await prisma.tokenBalance.findUnique({ where: { userId: session.user.id } });
   const estimatedCost = messages.reduce(
-    (acc: number, m: { content: string }) => acc + estimateTokens(m.content),
-    0
+    (acc: number, m: { content: string }) => acc + estimateTokens(m.content), 0
   );
 
   if (!balance || balance.balance < estimatedCost) {
@@ -32,6 +28,15 @@ export async function POST(req: NextRequest) {
   }
 
   const { url: ollamaUrl, nodeId } = await resolveOllamaUrl(model);
+
+  // If no live node and no env fallback, queue the job for a worker agent
+  const hasLiveNode = nodeId !== null || process.env.OLLAMA_URL;
+  if (!hasLiveNode) {
+    const job = await prisma.inferenceJob.create({
+      data: { userId: session.user.id, messages, model: model ?? 'llama3.2' },
+    });
+    return Response.json({ queued: true, jobId: job.id });
+  }
 
   const encoder = new TextEncoder();
   let fullResponse = '';
@@ -54,21 +59,13 @@ export async function POST(req: NextRequest) {
             data: { balance: { decrement: tokensUsed } },
           }),
           prisma.usageLog.create({
-            data: {
-              userId: session.user.id,
-              tokensUsed,
-              model: model || 'llama3.2',
-            },
+            data: { userId: session.user.id, tokensUsed, model: model || 'llama3.2' },
           }),
         ]);
 
-        if (nodeId) {
-          await recordNodeUsage(nodeId, session.user.id, tokensUsed);
-        }
+        if (nodeId) await recordNodeUsage(nodeId, session.user.id, tokensUsed);
 
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ done: true, tokensUsed })}\n\n`)
-        );
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, tokensUsed })}\n\n`));
         controller.close();
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Stream error';

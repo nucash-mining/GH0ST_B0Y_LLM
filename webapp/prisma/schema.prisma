@@ -143,6 +143,20 @@ model NodeEarning {
   node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
 }
 
+model InferenceJob {
+  id          String    @id @default(cuid())
+  userId      String
+  nodeId      String?
+  messages    Json
+  model       String    @default("llama3.2")
+  status      String    @default("pending") // pending | processing | completed | failed
+  result      String?
+  tokensUsed  Int?
+  createdAt   DateTime  @default(now())
+  claimedAt   DateTime?
+  completedAt DateTime?
+}
+
 model NodeApplication {
   id            String   @id @default(cuid())
   email         String   @unique
