@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
 import './globals.css';
+import { ClientProviders } from './client-providers';
 import { Header } from '@/components/layout/Header';
-
-// Providers use wagmi/WalletConnect which access indexedDB — client-only
-const Providers = dynamic(() => import('./providers').then(m => ({ default: m.Providers })), {
-  ssr: false,
-});
 
 export const metadata: Metadata = {
   title: 'GH0ST_B0Y Oracle | Decentralized LLM',
@@ -18,10 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="scan-overlay bg-ghost-black min-h-screen">
-        <Providers>
+        <ClientProviders>
           <Header />
           <main className="pt-16">{children}</main>
-        </Providers>
+        </ClientProviders>
       </body>
     </html>
   );
