@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAccount, useSignMessage } from 'wagmi';
@@ -7,7 +7,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from '@/components/ui/Button';
 import { GlowCard } from '@/components/ui/GlowCard';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/chat';
@@ -121,5 +121,13 @@ export default function SignInPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[90vh] flex items-center justify-center"><span className="text-ghost-cyan font-mono animate-pulse">Loading…</span></div>}>
+      <SignInContent />
+    </Suspense>
   );
 }
