@@ -425,12 +425,12 @@ def vram_monitor():
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
+    global OLLAMA_BASE
     parser = argparse.ArgumentParser(description="GH0ST_B0Y Node Agent")
     parser.add_argument("--token", required=True, help="Agent token from ghost-boy-llm.vercel.app/contribute")
     parser.add_argument("--ollama-url", default=OLLAMA_BASE)
     args = parser.parse_args()
 
-    global OLLAMA_BASE
     OLLAMA_BASE = args.ollama_url
 
     console.print(Panel(
