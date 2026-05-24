@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import './globals.css';
-import { Providers } from './providers';
 import { Header } from '@/components/layout/Header';
+
+// Providers use wagmi/WalletConnect which access indexedDB — client-only
+const Providers = dynamic(() => import('./providers').then(m => ({ default: m.Providers })), {
+  ssr: false,
+});
 
 export const metadata: Metadata = {
   title: 'GH0ST_B0Y Oracle | Decentralized LLM',
