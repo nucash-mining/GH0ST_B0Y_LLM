@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { streamChat, estimateTokens } from '@/lib/ollama';
 import { prisma } from '@/lib/prisma';
+import { resolveOllamaUrl, recordNodeUsage } from '@/lib/node-router';
 
 export const runtime = 'nodejs';
 
@@ -30,18 +31,21 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: 'Insufficient token balance' }), { status: 402 });
   }
 
+  const { url: ollamaUrl, nodeId } = await resolveOllamaUrl(model);
+
   const encoder = new TextEncoder();
   let fullResponse = '';
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const token of streamChat(messages, model)) {
+        for await (const token of streamChat(messages, model, ollamaUrl)) {
           fullResponse += token;
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
         }
 
-        const tokensUsed = estimateTokens(messages.map((m: { content: string }) => m.content).join(' ')) +
+        const tokensUsed =
+          estimateTokens(messages.map((m: { content: string }) => m.content).join(' ')) +
           estimateTokens(fullResponse);
 
         await prisma.$transaction([
@@ -57,6 +61,10 @@ export async function POST(req: NextRequest) {
             },
           }),
         ]);
+
+        if (nodeId) {
+          await recordNodeUsage(nodeId, session.user.id, tokensUsed);
+        }
 
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ done: true, tokensUsed })}\n\n`)

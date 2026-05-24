@@ -106,3 +106,44 @@ model Payment {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Node {
+  id            String    @id @default(cuid())
+  operatorEmail String    @unique
+  walletAddress String?
+  ollamaUrl     String
+  name          String
+  status        String    @default("pending")  // pending | active | suspended
+  approved      Boolean   @default(false)
+  gpuModel      String?
+  vramGb        Int?
+  storageGb     Int?
+  modelsLoaded  String[]
+  tokensServed  Int       @default(0)
+  lastHeartbeat DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  earnings NodeEarning[]
+}
+
+model NodeEarning {
+  id        String   @id @default(cuid())
+  nodeId    String
+  userId    String
+  tokens    Int
+  usdValue  Float
+  createdAt DateTime @default(now())
+
+  node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model NodeApplication {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  walletAddress String?
+  motivation    String?
+  status        String   @default("pending")  // pending | approved | denied
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

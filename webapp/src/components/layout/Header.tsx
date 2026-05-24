@@ -30,8 +30,12 @@ export function Header() {
           <Link href="/chat" className="hover:text-ghost-cyan transition-colors">Chat</Link>
           <Link href="/pricing" className="hover:text-ghost-cyan transition-colors">Pricing</Link>
           <Link href="/node-program" className="hover:text-ghost-purple transition-colors text-ghost-purple/70">Nodes</Link>
+          <Link href="/apply" className="hover:text-ghost-green transition-colors text-ghost-green/70">Apply</Link>
           {session && (
-            <Link href="/account" className="hover:text-ghost-cyan transition-colors">Account</Link>
+            <>
+              <Link href="/dashboard" className="hover:text-ghost-cyan transition-colors">Dashboard</Link>
+              <Link href="/account" className="hover:text-ghost-cyan transition-colors">Account</Link>
+            </>
           )}
         </nav>
 

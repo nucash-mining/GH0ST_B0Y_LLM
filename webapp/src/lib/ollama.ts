@@ -1,4 +1,4 @@
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const DEFAULT_OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
 export interface OllamaMessage {
   role: 'user' | 'assistant' | 'system';
@@ -7,9 +7,10 @@ export interface OllamaMessage {
 
 export async function* streamChat(
   messages: OllamaMessage[],
-  model: string = process.env.OLLAMA_DEFAULT_MODEL || 'llama3.2'
+  model: string = process.env.OLLAMA_DEFAULT_MODEL || 'llama3.2',
+  baseUrl: string = DEFAULT_OLLAMA_URL
 ): AsyncGenerator<string> {
-  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+  const res = await fetch(`${baseUrl}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model, messages, stream: true }),
@@ -40,9 +41,9 @@ export async function* streamChat(
   }
 }
 
-export async function listModels(): Promise<string[]> {
+export async function listModels(baseUrl: string = DEFAULT_OLLAMA_URL): Promise<string[]> {
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags`);
+    const res = await fetch(`${baseUrl}/api/tags`);
     if (!res.ok) return [];
     const data = await res.json();
     return (data.models ?? []).map((m: { name: string }) => m.name);
@@ -51,9 +52,9 @@ export async function listModels(): Promise<string[]> {
   }
 }
 
-export async function isOllamaRunning(): Promise<boolean> {
+export async function isOllamaRunning(baseUrl: string = DEFAULT_OLLAMA_URL): Promise<boolean> {
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags`, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
     return res.ok;
   } catch {
     return false;
