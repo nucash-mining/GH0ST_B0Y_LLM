@@ -6,8 +6,15 @@ import { randomUUID } from 'crypto';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  if (!session?.user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const operatorEmail = session.user.email
+    ?? (session.user.walletAddress ? `${session.user.walletAddress}@wallet.ghost` : null);
+
+  if (!operatorEmail) {
+    return Response.json({ error: 'Unauthorized: no email or wallet in session' }, { status: 401 });
   }
 
   const { name, walletAddress, resources, gpuModel, cpuModel, vramGb, ramGb, storageGb } =
@@ -21,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   // PC nodes get auto-approved — they only serve when Ollama is reachable
   const node = await prisma.node.upsert({
-    where: { operatorEmail: session.user.email },
+    where: { operatorEmail },
     update: {
       name,
       walletAddress,
@@ -33,7 +40,7 @@ export async function POST(req: NextRequest) {
       storageGb,
     },
     create: {
-      operatorEmail: session.user.email,
+      operatorEmail,
       ollamaUrl: '', // filled in by agent on first heartbeat
       name,
       nodeType: 'pc',

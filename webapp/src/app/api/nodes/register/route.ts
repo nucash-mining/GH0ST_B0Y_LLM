@@ -6,8 +6,16 @@ import { listModels, isOllamaRunning } from '@/lib/ollama';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  if (!session?.user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // wallet-auth users have no email — derive a stable identifier from their address
+  const operatorEmail = session.user.email
+    ?? (session.user.walletAddress ? `${session.user.walletAddress}@wallet.ghost` : null);
+
+  if (!operatorEmail) {
+    return Response.json({ error: 'Unauthorized: no email or wallet found in session' }, { status: 401 });
   }
 
   const { ollamaUrl, name, gpuModel, vramGb, storageGb, walletAddress } = await req.json();
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
   const modelsLoaded = await listModels(ollamaUrl);
 
   const node = await prisma.node.upsert({
-    where: { operatorEmail: session.user.email },
+    where: { operatorEmail },
     update: {
       ollamaUrl,
       name,
@@ -36,7 +44,7 @@ export async function POST(req: NextRequest) {
       lastHeartbeat: new Date(),
     },
     create: {
-      operatorEmail: session.user.email,
+      operatorEmail,
       ollamaUrl,
       name,
       gpuModel,

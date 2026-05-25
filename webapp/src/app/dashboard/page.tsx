@@ -51,10 +51,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status !== 'authenticated') return;
-    fetch('/api/admin/nodes')
+    fetch('/api/nodes/my')
       .then(r => r.json())
       .then(d => {
-        const myNode = d.nodes?.find((n: NodeData) => true); // first node owned by this user
+        const myNode = d.node;
         if (myNode) {
           setNode(myNode);
           setForm({

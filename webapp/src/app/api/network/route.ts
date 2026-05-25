@@ -1,10 +1,11 @@
 import { prisma } from '@/lib/prisma';
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const cutoff = new Date(Date.now() - 5 * 60 * 1000);
 
+  try {
   const [nodes, totalJobs, totalTokens] = await Promise.all([
     prisma.node.findMany({
       where: { approved: true },
@@ -55,4 +56,8 @@ export async function GET() {
       totalTokensServed: totalTokens._sum.tokensUsed ?? 0,
     },
   });
+  } catch (err) {
+    console.error('[/api/network]', err);
+    return Response.json({ nodes: [], stats: { totalNodes: 0, onlineNodes: 0, chainVerifiedNodes: 0, totalVramGb: 0, totalJobsCompleted: 0, totalTokensServed: 0 } }, { status: 200 });
+  }
 }
