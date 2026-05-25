@@ -108,28 +108,64 @@ model Payment {
 }
 
 model Node {
-  id            String    @id @default(cuid())
-  operatorEmail String    @unique
-  walletAddress String?
-  ollamaUrl     String
-  name          String
-  nodeType      String    @default("pc")       // pc | dgx_air
-  status        String    @default("pending")  // pending | active | suspended
-  approved      Boolean   @default(false)
-  gpuModel      String?
-  cpuModel      String?
-  vramGb        Int?
-  ramGb         Int?
-  storageGb     Int?
-  resources     String[]  // gpu | cpu | ram | storage | bandwidth | relay
-  modelsLoaded  String[]
-  tokensServed  Int       @default(0)
-  agentToken    String?   @unique
-  lastHeartbeat DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  operatorEmail       String    @unique
+  walletAddress       String?
+  ollamaUrl           String
+  peerUrl             String?   // direct inter-node URL (host:port of agent RPC)
+  name                String
+  nodeType            String    @default("pc")       // pc | dgx_air | rpc_worker
+  status              String    @default("pending")  // pending | active | suspended
+  approved            Boolean   @default(false)
+  gpuModel            String?
+  cpuModel            String?
+  vramGb              Int?
+  ramGb               Int?
+  storageGb           Int?
+  resources           String[]  // gpu | cpu | ram | storage | bandwidth | relay
+  modelsLoaded        String[]
+  tokensServed        Int       @default(0)
+  agentToken          String?   @unique
+  lastHeartbeat       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // on-chain fields
+  chainRegistered     Boolean   @default(false)
+  chainAddress        String?   // wallet address used on ComputeRegistry contract
+  chainTxHash         String?   // registration tx hash
+
+  // hardware verification
+  hardwareFingerprint String?   // keccak256(gpu+cpu+disk) reported by agent
+  benchmarkScore      Int?      // tokens/sec × 100
+  agentVersion        String?
 
   earnings NodeEarning[]
+  clusterJobs ComputeClusterNode[]
+}
+
+model ComputeCluster {
+  id        String   @id @default(cuid())
+  jobId     String   @unique
+  model     String
+  status    String   @default("pending") // pending | running | complete | failed
+  createdAt DateTime @default(now())
+
+  nodes ComputeClusterNode[]
+}
+
+model ComputeClusterNode {
+  id        String @id @default(cuid())
+  clusterId String
+  nodeId    String
+  layerStart Int?  // for future tensor-parallel sharding
+  layerEnd   Int?
+  tokensServed Int @default(0)
+
+  cluster ComputeCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  node    Node           @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([clusterId, nodeId])
 }
 
 model NodeEarning {
