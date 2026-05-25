@@ -17,6 +17,12 @@ type NodeData = {
   modelsLoaded: string[];
   tokensServed: number;
   lastHeartbeat: string | null;
+  chainRegistered: boolean;
+  chainAddress: string | null;
+  chainTxHash: string | null;
+  benchmarkScore: number | null;
+  hardwareFingerprint: string | null;
+  agentVersion: string | null;
 };
 
 type RegisterForm = {
@@ -117,10 +123,10 @@ export default function DashboardPage() {
       {node && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'Tokens Served', value: node.tokensServed.toLocaleString() },
-            { label: 'Models Loaded', value: node.modelsLoaded.length.toString() },
-            { label: 'VRAM', value: node.vramGb ? `${node.vramGb} GB` : '—' },
-            { label: 'Storage', value: node.storageGb ? `${node.storageGb} GB` : '—' },
+            { label: 'Tokens Served',   value: node.tokensServed.toLocaleString() },
+            { label: 'Models Loaded',  value: node.modelsLoaded.length.toString() },
+            { label: 'VRAM',           value: node.vramGb ? `${node.vramGb} GB` : '—' },
+            { label: 'Benchmark',      value: node.benchmarkScore ? `${Math.round(node.benchmarkScore / 100)} tok/s` : '—' },
           ].map(stat => (
             <GlowCard key={stat.label} glow="cyan" className="text-center">
               <div className="text-2xl font-mono font-bold text-ghost-cyan">{stat.value}</div>
@@ -128,6 +134,61 @@ export default function DashboardPage() {
             </GlowCard>
           ))}
         </div>
+      )}
+
+      {/* On-chain status */}
+      {node && (
+        <GlowCard glow={node.chainRegistered ? 'purple' : 'cyan'}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-ghost-purple font-mono text-sm tracking-widest uppercase">Blockchain Status</h2>
+            {node.chainRegistered ? (
+              <span className="px-2 py-0.5 rounded font-mono text-xs border border-ghost-purple/40 bg-ghost-purple/10 text-ghost-purple">
+                ✓ ON-CHAIN · SEPOLIA
+              </span>
+            ) : (
+              <a href="/contribute" className="text-ghost-muted font-mono text-xs hover:text-ghost-cyan">
+                Register on-chain →
+              </a>
+            )}
+          </div>
+          {node.chainRegistered ? (
+            <div className="space-y-2 font-mono text-xs">
+              <div className="flex gap-3">
+                <span className="text-ghost-muted w-28 shrink-0">Operator wallet</span>
+                <a
+                  href={`https://sepolia.etherscan.io/address/${node.chainAddress}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-ghost-purple hover:text-ghost-cyan break-all"
+                >
+                  {node.chainAddress}
+                </a>
+              </div>
+              {node.chainTxHash && (
+                <div className="flex gap-3">
+                  <span className="text-ghost-muted w-28 shrink-0">Registration tx</span>
+                  <a
+                    href={`https://sepolia.etherscan.io/tx/${node.chainTxHash}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-ghost-cyan hover:text-ghost-purple break-all"
+                  >
+                    {node.chainTxHash.slice(0, 24)}…
+                  </a>
+                </div>
+              )}
+              {node.hardwareFingerprint && (
+                <div className="flex gap-3">
+                  <span className="text-ghost-muted w-28 shrink-0">HW fingerprint</span>
+                  <span className="text-ghost-muted/70">{node.hardwareFingerprint.slice(0, 20)}…</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-ghost-muted font-mono text-xs leading-relaxed">
+              Your node is registered off-chain. Stake 0.01 ETH on Sepolia to join the on-chain registry —
+              on-chain nodes earn ETH directly from job settlements and are prioritised for routing.
+            </p>
+          )}
+        </GlowCard>
       )}
 
       {node && (

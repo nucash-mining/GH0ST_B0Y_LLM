@@ -2,8 +2,30 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { parseEther } from 'viem';
 import { GlowCard } from '@/components/ui/GlowCard';
 import { Button } from '@/components/ui/Button';
+import { CheckCircle, Link2 } from 'lucide-react';
+
+const CONTRACT_ADDRESS = '0x54b8c1c669bceb0574d0622b2cf4c18e6efb15b8' as const;
+const CONTRACT_ABI = [
+  {
+    inputs: [
+      { name: 'fingerprint',    type: 'bytes32' },
+      { name: 'benchmarkScore', type: 'uint256' },
+      { name: 'vramGb',         type: 'uint256' },
+      { name: 'ramGb',          type: 'uint256' },
+      { name: 'ollamaUrl',      type: 'string'  },
+      { name: 'agentVersion',   type: 'string'  },
+    ],
+    name: 'registerNode',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+] as const;
 
 const RESOURCES = [
   { id: 'gpu',       label: 'GPU',       icon: '⚡', desc: 'Run LLM inference tasks',        earn: 'up to $0.40/hr' },
@@ -26,12 +48,32 @@ const SPECS = [
 export default function ContributePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { address: walletAddress, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
+  const { writeContract, data: txHash, isPending: txPending, error: txError } = useWriteContract();
+  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+
   const [resources, setResources] = useState<string[]>(['gpu']);
   const [name, setName] = useState('');
   const [specs, setSpecs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [agentToken, setAgentToken] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [chainStep, setChainStep] = useState<'idle' | 'connecting' | 'sending' | 'confirming' | 'done'>('idle');
+  const [chainNotified, setChainNotified] = useState(false);
+
+  // After tx confirms, notify backend
+  useEffect(() => {
+    if (txConfirmed && txHash && walletAddress && !chainNotified) {
+      setChainStep('done');
+      setChainNotified(true);
+      fetch('/api/nodes/chain-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${agentToken}` },
+        body: JSON.stringify({ txHash, walletAddress, fingerprint: null }),
+      }).catch(() => {});
+    }
+  }, [txConfirmed, txHash, walletAddress, agentToken, chainNotified]);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin?callbackUrl=/contribute');
@@ -39,6 +81,30 @@ export default function ContributePage() {
 
   function toggle(id: string) {
     setResources(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
+  }
+
+  async function registerOnChain() {
+    if (!isConnected) { openConnectModal?.(); return; }
+    setChainStep('sending');
+    try {
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: 'registerNode',
+        args: [
+          ('0x' + '0'.repeat(64)) as `0x${string}`, // fingerprint set by agent
+          BigInt(0),    // benchmarkScore set by agent
+          BigInt(specs.vramGb ? parseInt(specs.vramGb) : 0),
+          BigInt(specs.ramGb ? parseInt(specs.ramGb) : 0),
+          '',           // ollamaUrl set by agent on first heartbeat
+          '3.0.0',
+        ],
+        value: parseEther('0.01'),
+      });
+      setChainStep('confirming');
+    } catch {
+      setChainStep('idle');
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -137,14 +203,81 @@ python3 ghostboy-agent.py --token ${agentToken}`}
             </div>
           </GlowCard>
 
+              {/* On-chain registration */}
+          <GlowCard glow="purple">
+            <div className="flex items-center gap-2 mb-3">
+              <Link2 size={14} className="text-ghost-purple" />
+              <h3 className="text-ghost-purple font-mono text-sm tracking-widest uppercase">
+                Step 2 — Register On-Chain <span className="text-ghost-muted font-mono text-xs normal-case">(optional but recommended)</span>
+              </h3>
+            </div>
+
+            <p className="text-ghost-muted font-mono text-xs mb-4 leading-relaxed">
+              Stake <strong className="text-ghost-cyan">0.01 ETH on Sepolia</strong> to add your node to the{' '}
+              <a href="https://sepolia.etherscan.io/address/0x54b8c1c669bceb0574d0622b2cf4c18e6efb15b8"
+                target="_blank" rel="noopener noreferrer"
+                className="text-ghost-purple hover:text-ghost-cyan underline underline-offset-2">
+                ComputeRegistry contract
+              </a>.
+              On-chain nodes are prioritised for job routing and earn ETH directly from job settlements.
+              Your private key never leaves your wallet — the transaction is signed locally by MetaMask.
+            </p>
+
+            {chainStep === 'done' || txConfirmed ? (
+              <div className="flex items-center gap-3 p-3 bg-ghost-green/10 border border-ghost-green/30 rounded-lg">
+                <CheckCircle size={16} className="text-ghost-green shrink-0" />
+                <div>
+                  <div className="text-ghost-green font-mono text-sm font-bold">Registered on Sepolia</div>
+                  {txHash && (
+                    <a
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-ghost-muted font-mono text-xs hover:text-ghost-cyan"
+                    >
+                      {txHash.slice(0, 18)}… ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {!isConnected ? (
+                  <Button variant="secondary" className="border-ghost-purple/40 text-ghost-purple" onClick={() => openConnectModal?.()}>
+                    Connect Wallet
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-ghost-muted font-mono text-xs">
+                      {walletAddress?.slice(0, 10)}…{walletAddress?.slice(-6)}
+                    </span>
+                    <Button
+                      variant="secondary"
+                      className="border-ghost-purple/40 text-ghost-purple hover:border-ghost-purple"
+                      onClick={registerOnChain}
+                      loading={txPending || chainStep === 'confirming'}
+                    >
+                      {chainStep === 'confirming' ? 'Confirming…' : 'Stake 0.01 ETH & Register'}
+                    </Button>
+                  </div>
+                )}
+                {txError && (
+                  <p className="text-ghost-red font-mono text-xs">{txError.message?.slice(0, 120)}</p>
+                )}
+                <p className="text-ghost-muted/60 font-mono text-xs">
+                  Network: Sepolia testnet · Contract: 0x54b8…B15B8 · Min stake: 0.01 ETH
+                </p>
+              </div>
+            )}
+          </GlowCard>
+
           <GlowCard glow="cyan">
             <h3 className="text-ghost-cyan font-mono text-sm tracking-widest uppercase mb-2">What happens next</h3>
             <ul className="space-y-2 text-ghost-muted font-mono text-xs">
               <li>• Agent detects your GPU/CPU/RAM and installs Ollama if missing</li>
-              <li>• Pulls the best model for your hardware automatically</li>
-              <li>• Sends a heartbeat every 60 seconds — your node shows online in the network</li>
-              <li>• Chat requests from GH0ST_B0Y users route to your node when you're the least loaded</li>
-              <li>• Earnings accumulate per token served — track them on your Dashboard</li>
+              <li>• Runs a benchmark test and submits your hardware score to the network</li>
+              <li>• Sends a heartbeat every 60 s — your node appears on the <a href="/network" className="text-ghost-cyan hover:underline">network page</a></li>
+              <li>• Chat requests route to your node when you're the best fit (VRAM, benchmark, load)</li>
+              <li>• On-chain nodes earn ETH per job · Off-chain nodes earn token credits</li>
             </ul>
           </GlowCard>
         </div>

@@ -54,6 +54,7 @@ export default function LandingPage() {
                 { label: '7', sub: 'Chains' },
                 { label: 'PoW/PoC', sub: 'Consensus' },
                 { label: '96GB', sub: 'VRAM nodes' },
+                { label: 'Sepolia', sub: 'On-chain' },
               ].map(s => (
                 <div key={s.sub} className="text-center">
                   <div className="font-mono font-bold text-ghost-cyan" style={{ fontSize: 'clamp(1rem,2vw,1.5rem)' }}>
@@ -65,7 +66,7 @@ export default function LandingPage() {
             </div>
             <div className="flex gap-3 flex-wrap justify-end">
               <Link href="/chat"><Button size="sm">Launch Chat</Button></Link>
-              <Link href="/pricing"><Button variant="secondary" size="sm">Pricing</Button></Link>
+              <Link href="/network"><Button variant="secondary" size="sm">Live Network</Button></Link>
               <Link href="/node-program">
                 <Button variant="ghost" size="sm" className="text-ghost-purple hover:text-ghost-purple border border-ghost-purple/30 hover:border-ghost-purple/60">
                   Node Program
