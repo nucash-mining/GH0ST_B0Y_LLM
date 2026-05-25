@@ -68,6 +68,29 @@ In Vercel project → Domains → Add `oracle.wattxchain.org` or similar.
 
 ---
 
+## WATTx Compute Contracts — Deployed
+
+| Contract        | Network | Address                                      |
+|-----------------|---------|----------------------------------------------|
+| ComputeRegistry | Sepolia | `0x54b8c1c669bceb0574d0622b2cf4c18e6efb15b8` |
+
+- **Owner / initial oracle:** `0x8304bc5b4bed9a350672fdbbfec166c336fc9497`
+- **Deployment tx:** `0xceeaa2dcd6df9193533d5e0fadf490bd99bc055f83f18234409846aebc1795c1`
+- **Deployed:** 2026-05-24
+
+**Vercel env vars to add:**
+```
+COMPUTE_REGISTRY_ADDRESS=0x54b8c1c669bceb0574d0622b2cf4c18e6efb15b8
+RPC_URL=https://sepolia.drpc.org
+ORACLE_PRIVATE_KEY=<oracle wallet key>
+ORACLE_SECRET=<openssl rand -hex 32>
+```
+
+After setting `ORACLE_PRIVATE_KEY`, call `ComputeRegistry.setOracle(oracleAddress)`
+from the owner wallet to register the Vercel backend as the settlement oracle.
+
+---
+
 ## Future: NVIDIA DGX Air Node Hosting
 
 When DGX Air trial nodes come online, the Ollama server moves off localhost
